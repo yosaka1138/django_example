@@ -2,12 +2,26 @@ from http.client import HTTPResponse
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import TemplateView
+from django.db.models import QuerySet
 from .forms import HelloForm
 from .models import Friend
 
 
+def __new_str__(self):
+    result = ""
+    for item in self:
+        result += "<tr>"
+        for k in item:
+            result += "<td>" + str(k) + "=" + str(item[k]) + "</td>"
+        result += "</tr>"
+    return result
+
+
+QuerySet.__str__ = __new_str__
+
+
 def index(request):
-    data = Friend.objects.all()
+    data = Friend.objects.all().values("id", "name", "age")
     params = {
         "title": "Hello",
         "data": data,
@@ -15,7 +29,28 @@ def index(request):
     return render(request, "hello/index.html", params)
 
 
-def indexv6(request):
+def index_v8(request):
+    num = Friend.objects.all().count()
+    first = Friend.objects.all().first()
+    last = Friend.objects.all().last()
+    data = [num, first, last]
+    params = {
+        "title": "Hello",
+        "data": data,
+    }
+    return render(request, "hello/index.html", params)
+
+
+def index_v7(request):
+    data = Friend.objects.all().values_list("id", "name")
+    params = {
+        "title": "Hello",
+        "data": data,
+    }
+    return render(request, "hello/index.html", params)
+
+
+def index_v6(request):
     params = {
         "title": "Hello",
         "message": "all friends",

@@ -13,19 +13,10 @@
 </head>
 
 <body class="container">
-    <h1 class="display-4 text-primary">{{title}}</h1>
-    <p class="h5 mt-4">{{message | safe}}</p>
+    <h1 class="display-4 text-primary">{{ title }}</h1>
     <table class="table">
-        <tr>
-            <td>data</td>
-        </tr>
-        {% for item in data %}
-        <tr>
-            <td>{{item}}</td>
-        </tr>
-        {% endfor %}
+        {{ data | safe}}
     </table>
 </body>
 
 </html>
-
