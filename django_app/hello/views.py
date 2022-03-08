@@ -4,9 +4,57 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 from django.db.models import QuerySet
 from django.views.generic import ListView, DetailView
+from django.db.models import Q
 from .models import Friend
-from .forms import HelloForm
+from .forms import FindForm, HelloForm
 from .forms import FriendForm
+
+
+def find(request):
+    """複数項目に対して同じキーワードで検索"""
+    if request.method == "POST":
+        msg = "search result:"
+        form = FindForm(request.POST)
+        find = request.POST["find"]
+        data = Friend.objects.filter(Q(name__contains=find) | Q(mail__contains=find))
+    else:
+        msg = "search words..."
+        form = FindForm()
+        data = Friend.objects.all()
+    params = {
+        "title": "Hello",
+        "message": msg,
+        "form": form,
+        "data": data,
+    }
+    return render(request, "hello/find.html", params)
+
+
+def find_v1(request):
+    """単一検索"""
+    if request.method == "POST":
+        form = FindForm(request.POST)
+        find = request.POST["find"]
+        # *__containsで曖昧検索
+        # *__startwithで接頭辞，*__endwithで接尾辞検索
+        # *__iexactで大文字小文字を区別しない
+        # *__icontains等もある
+        # data = Friend.objects.filter(name__contains=find)
+        # 数値の比較
+        # lt, lte, gt, gteなどで大小比較
+        data = Friend.objects.filter(age__lte=int(find))
+        msg = f"Result: {data.count()}"
+    else:
+        msg = "search words..."
+        form = FindForm()
+        data = Friend.objects.all()
+    params = {
+        "title": "Hello",
+        "message": msg,
+        "form": form,
+        "data": data,
+    }
+    return render(request, "hello/find.html", params)
 
 
 class FriendList(ListView):
