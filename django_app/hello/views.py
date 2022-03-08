@@ -1,10 +1,89 @@
 from http.client import HTTPResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.generic import TemplateView
 from django.db.models import QuerySet
-from .forms import HelloForm
+from django.views.generic import ListView, DetailView
 from .models import Friend
+from .forms import HelloForm
+from .forms import FriendForm
+
+
+class FriendList(ListView):
+    model = Friend
+
+
+class FriendDeteil(DetailView):
+    model = Friend
+
+
+def delete(request, num):
+    friend = Friend.objects.get(id=num)
+    if request.method == "POST":
+        friend.delete()
+        return redirect(to="/hello")
+    params = {
+        "title": "Hello",
+        "id": num,
+        "obj": friend,
+    }
+    return render(request, "hello/delete.html", params)
+
+
+def edit(request, num):
+    obj = Friend.objects.get(id=num)
+    if request.method == "POST":
+        friend = FriendForm(request.POST, instance=obj)
+        friend.save()
+        return redirect(to="/hello")
+    params = {
+        "title": "Hello",
+        "id": num,
+        "form": FriendForm(instance=obj),
+    }
+    return render(request, "hello/edit.html", params)
+
+
+def index(request):
+    data = Friend.objects.all()
+    params = {
+        "title": "Hello",
+        "data": data,
+    }
+    return render(request, "hello/index.html", params)
+
+
+def create(request):
+    """いちいちkeyを指定しないで登録する"""
+    if request.method == "POST":
+        obj = Friend()
+        friend = FriendForm(request.POST, instance=obj)
+        friend.save()
+        return redirect(to="/hello")
+    params = {
+        "title": "Hello",
+        "form": FriendForm(),
+    }
+    return render(request, "hello/create.html", params)
+
+
+# create model
+def create_v1(request):
+    params = {
+        "title": "Hello",
+        "form": HelloForm(),
+    }
+    if request.method == "POST":
+        name = request.POST["name"]
+        mail = request.POST["mail"]
+        gender = "gender" in request.POST
+        age = request.POST["age"]
+        birth = request.POST["birthday"]
+        # modelの作成
+        friend = Friend(name=name, mail=mail, gender=gender, age=age, birthday=birth)
+        friend.save()
+        return redirect(to="/hello")
+    return render(request, "hello/create.html", params)
 
 
 def __new_str__(self):
@@ -17,10 +96,10 @@ def __new_str__(self):
     return result
 
 
-QuerySet.__str__ = __new_str__
+# QuerySet.__str__ = __new_str__
 
 
-def index(request):
+def index_v9(request):
     data = Friend.objects.all().values("id", "name", "age")
     params = {
         "title": "Hello",
