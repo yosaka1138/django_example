@@ -6,10 +6,23 @@ from django.db.models import QuerySet
 from django.views.generic import ListView, DetailView
 from django.db.models import Q
 from django.db.models import Count, Avg, Sum, Min, Max
+from django.core.paginator import Paginator
 from .models import Friend
 from .forms import FindForm, HelloForm
 from .forms import FriendForm
 from .forms import CheckForm
+
+
+def index(request, num=1):
+    """表示する項目を3つずつに分けて表示"""
+    data = Friend.objects.all()
+    page = Paginator(data, 3)
+    params = {
+        "title": "Hello",
+        "message": "",
+        "data": page.get_page(num),
+    }
+    return render(request, "hello/index.html", params)
 
 
 def check(request):
@@ -67,7 +80,7 @@ def find(request):
     return render(request, "hello/find.html", params)
 
 
-def index(request):
+def index_v12(request):
     data = Friend.objects.all()
     re1 = Friend.objects.aggregate(Count("age"))
     re2 = Friend.objects.aggregate(Sum("age"))
