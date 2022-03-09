@@ -5,12 +5,93 @@ from django.views.generic import TemplateView
 from django.db.models import QuerySet
 from django.views.generic import ListView, DetailView
 from django.db.models import Q
+from django.db.models import Count, Avg, Sum, Min, Max
 from .models import Friend
 from .forms import FindForm, HelloForm
 from .forms import FriendForm
 
 
 def find(request):
+    if request.method == "POST":
+        msg = request.POST["find"]
+        form = FindForm(request.POST)
+        sql = "select * from hello_friend"
+        if msg != "":
+            sql += " where " + msg
+        data = Friend.objects.raw(sql)
+        msg = sql
+    else:
+        msg = "search words..."
+        form = FindForm()
+        data = Friend.objects.all()
+    params = {
+        "title": "Hello",
+        "message": msg,
+        "form": form,
+        "data": data,
+    }
+    return render(request, "hello/find.html", params)
+
+
+def index(request):
+    data = Friend.objects.all()
+    re1 = Friend.objects.aggregate(Count("age"))
+    re2 = Friend.objects.aggregate(Sum("age"))
+    re3 = Friend.objects.aggregate(Avg("age"))
+    re4 = Friend.objects.aggregate(Min("age"))
+    re5 = Friend.objects.aggregate(Max("age"))
+    msg = (
+        "Count:"
+        + str(re1["age__count"])
+        + "<br>Sum:"
+        + str(re2["age__sum"])
+        + "<br>Average:"
+        + str(re3["age__avg"])
+        + "<br>Min:"
+        + str(re4["age__min"])
+        + "<br>Max"
+        + str(re5["age__max"])
+    )
+    params = {
+        "title": "Hello",
+        "message": msg,
+        "data": data,
+    }
+    return render(request, "hello/index.html", params)
+
+
+def find_v3(request):
+    """範囲検索"""
+    if request.method == "POST":
+        msg = "search result:"
+        form = FindForm(request.POST)
+        find = request.POST["find"]
+        lst = find.split()
+        data = Friend.objects.all()[int(lst[0]) : int(lst[1])]
+    else:
+        msg = "search words..."
+        form = FindForm()
+        data = Friend.objects.all()
+    params = {
+        "title": "Hello",
+        "message": msg,
+        "form": form,
+        "data": data,
+    }
+    return render(request, "hello/find.html", params)
+
+
+def index_v11(request):
+    data = Friend.objects.all().order_by("age").reverse()
+    params = {
+        "title": "Hello",
+        "message": "",
+        "data": data,
+    }
+    return render(request, "hello/index.html", params)
+
+
+def find_v2(request):
     """複数項目に対して同じキーワードで検索"""
     if request.method == "POST":
         msg = "search result:"
@@ -92,7 +173,7 @@ def edit(request, num):
     return render(request, "hello/edit.html", params)
 
 
-def index(request):
+def index_v10(request):
     data = Friend.objects.all()
     params = {
         "title": "Hello",
