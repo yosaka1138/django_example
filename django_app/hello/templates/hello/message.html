@@ -1,4 +1,4 @@
-{% load static %}
+{% load static%}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,50 +6,42 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         crossorigin="anonymous">
-    <title>{{title}}</title>
-
 </head>
 
 <body class="container">
-    <h1 class="display-4 text-primary">{{ title }}</h1>
-    <p>{{message | safe}}</p>
+    <h1 class="display-4 text-primary">
+        {{title}}
+    </h1>
+    <form action="{% url 'message' %" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="send" class="btn btn-primary">
+    </form>
+    <div class="mt-5"></div>
     <table class="table">
         <tr>
-            <th>id</th>
-            <th>name</th>
-            <th>age</th>
-            <th>mail</th>
-            <th>birthday</th>
+            <th class="py-1">title</th>
+            <th class="py-1">name</th>
+            <th class="py-1">datetime</th>
         </tr>
         {% for item in data %}
         <tr>
-            <td>{{item.id}}</td>
-            <td>{{item.name}}</td>
-            <td>{{item.age}}</td>
-            <td>{{item.mail}}</td>
-            <td>{{item.birthday}}</td>
-            <td>
-                <ul>
-                    {% for ob in item.message_set.all %}
-                    <li>{{ob.title}}</li>
-                    {% endfor %}
-                </ul>
-            </td>
-            <!-- <td><a href="{% url 'edit' item.id %}" class="btn btn-primary">Edit</a>
-                <a href="{% url 'delete' item.id %}" class="btn btn-danger">Delete</a>
-            </td> -->
+            <td class="py-2">{{item.title}}</td>
+            <td class="py-2">{{item.friend.name}}</td>
+            <td class="py-2">{{item.pub_date}}</td>
         </tr>
         {% endfor %}
     </table>
     <ul class="pagination">
         {% if data.has_previous %}
         <li class="page-item">
-            <a href="{% url 'index' %}" class="page-link">&laquo; first</a>
+            <a href="{% url 'message' %}" class="page-link">&laquo; first</a>
         </li>
         <li class="page-item">
-            <a href="{% url 'index' %}{{ data.previous_page_number }}" class="page-link">&laquo; prev</a>
+            <a href="{% url 'message' %}{{ data.previous_page_number }}" class="page-link">&laquo; prev</a>
         </li>
         {% else %}
         <li class="page-item">
@@ -65,10 +57,10 @@
         </li>
         {% if data.has_next %}
         <li class="page-item">
-            <a class="page-link" href="{% url 'index' %}{{data.next_page_number}}">next &raquo;</a>
+            <a class="page-link" href="{% url 'message' %}{{data.next_page_number}}">next &raquo;</a>
         </li>
         <li class="page-item">
-            <a class="page-link" href="{% url 'index' %}{{data.paginator.num_pages}}">last &raquo;</a>
+            <a class="page-link" href="{% url 'message' %}{{data.paginator.num_pages}}">last &raquo;</a>
         </li>
         {% else %}
         <li class="page-item">
