@@ -9,6 +9,40 @@ from django.db.models import Count, Avg, Sum, Min, Max
 from .models import Friend
 from .forms import FindForm, HelloForm
 from .forms import FriendForm
+from .forms import CheckForm
+
+
+def check(request):
+    params = {
+        "title": "Hello",
+        "message": "check validation",
+        "form": FriendForm(),
+    }
+    if request.method == "POST":
+        obj = Friend()
+        form = FriendForm(request.POST, instance=obj)
+        params["form"] = form
+        if form.is_valid():
+            params["message"] = "OK"
+        else:
+            params["message"] = "no good"
+    return render(request, "hello/check.html", params)
+
+
+def check_v1(request):
+    params = {
+        "title": "Hello",
+        "message": "check validation",
+        "form": CheckForm(),
+    }
+    if request.method == "POST":
+        form = CheckForm(request.POST)
+        params["form"] = form
+        if form.is_valid():
+            params["message"] = "OK"
+        else:
+            params["message"] = "no good."
+    return render(request, "hello/check.html", params)
 
 
 def find(request):
